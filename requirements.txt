@@ -1,0 +1,12 @@
+pandas==2.2.3
+numpy==2.2.3
+scikit-learn==1.6.1
+xgboost==2.1.4
+pyarrow==19.0.1
+feature-engine==1.8.3
+openpyxl==3.1.5
+PyQt6==6.5.2
+joblib==1.4.2
+matplotlib==3.10.1
+seaborn==0.13.2
+pyinstaller==5.13.0
