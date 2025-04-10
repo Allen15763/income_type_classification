@@ -51,7 +51,7 @@ def build_app():
         "--hidden-import=sklearn.utils",
         
         # Feature-engine 模組
-        "--hidden-import=feature_engine.transformation",
+        # "--hidden-import=feature_engine.transformation",
         
         # Joblib 模組
         "--hidden-import=joblib",
@@ -83,6 +83,20 @@ def build_app():
     ]
     
     pyinstaller_args.extend(hidden_imports)
+
+    # 收集所有相關包
+    collect_options = [
+        "--collect-all=feature_engine",
+        "--collect-submodules=feature_engine",
+        "--collect-data=feature_engine",
+        "--collect-binaries=feature_engine",
+
+        "--collect-all=sklearn",
+        "--collect-all=scipy",
+        "--collect-all=xgboost"
+    ]
+    
+    pyinstaller_args.extend(collect_options)
     
     # 添加其他有用的選項
     pyinstaller_args.extend([
