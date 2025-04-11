@@ -8,6 +8,8 @@ from utils.logger import get_logger
 logger = get_logger(__name__)
 
 class DataProcessor:
+    mapping_columns = ['GL Date', 'payment_date', 'supplier', 'line_desc', 
+                       'supplier_type', 'year_month', 'cleaned_line_desc', 'amount']
     """
     負責處理原始數據的類別，實現單一職責原則(SRP)
     主要處理：
@@ -208,3 +210,50 @@ class DataProcessor:
             return '企業'
         else:
             return '其他'
+        
+    @classmethod
+    def group_by_supplier(self, df: pd.DataFrame) -> pd.DataFrame:
+        """根據付款供應商名稱分組並計算金額總和
+            - 計算在同一付款/GL日下的同一供應商的借貸淨額，大於零即為付款
+                - 等於或小於零不視為付款，故不申報對方收入項目。
+        """
+        df_copy = df.copy()
+        suppliers = df_copy['supplier'].unique()
+        necessary_cols = self.mapping_columns.copy()
+        grouped_cols = necessary_cols[:-1]  # 所有必要列，除了'amount'
+        
+        dfs = []
+        for supplier in suppliers:
+            df_supplier = df_copy.loc[df_copy['supplier'] == supplier, necessary_cols]
+            df_grouped = df_supplier.groupby(grouped_cols)\
+                .agg(amount=pd.NamedAgg(column="amount", aggfunc="sum")).reset_index()
+            dfs.append(df_grouped)
+
+        df_grouped = pd.concat(dfs, ignore_index=True)
+        df_grouped = df_grouped.loc[df_grouped['amount'] > 0, :].reset_index(drop=True)
+        return df_grouped
+    
+    @classmethod
+    def create_mapping_key(self, df: pd.DataFrame) -> Dict[str, str]:
+        df_copy = df.copy()
+        columns_to_concat = [col for col in self.mapping_columns if col != 'amount']
+        df_copy['mapping_key'] = df_copy.apply(lambda row: "".join(row[columns_to_concat].astype(str)), axis=1)
+        return df_copy
+    
+    @classmethod
+    def copy_amount_for_log(self, df: pd.DataFrame) -> pd.DataFrame:
+        """將金額複製到log欄位"""
+        df_copy = df.copy()
+        df_copy['origin_amount'] = df_copy['amount']
+        df_copy['amount'] = df_copy['amount'].abs().add(1)
+        return df_copy
+    
+    @classmethod
+    def remove_unnecessary_columns(self, df: pd.DataFrame) -> pd.DataFrame:
+        """移除不必要的列"""
+        # TODO
+        df_copy = df.copy()
+        unnecessary_cols = [col for col in df_copy.columns if col not in self.mapping_columns]
+        df_copy.drop(columns=unnecessary_cols, inplace=True, errors='ignore')
+        return df_copy
+    
