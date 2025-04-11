@@ -68,10 +68,10 @@ class Predictor:
         # 載入並處理數據
         raw_data = self.data_processor.load_data(file_path)
         cleaned_data = self.data_processor.clean_data()
-        features_data = self.data_processor.extract_features()
+        # features_data = self.data_processor.extract_features()
         
         # 預處理並特徵工程
-        processed_data = self.feature_engineer.preprocess_data(features_data)
+        processed_data = self.feature_engineer.preprocess_data(cleaned_data)
         
         # 如果沒有特徵管道，創建一個
         if self.feature_engineer.feature_pipeline is None:

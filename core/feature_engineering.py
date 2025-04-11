@@ -93,6 +93,12 @@ class FeatureEngineer:
                 
         if 'income_type_name' in processed_df.columns:
             processed_df['income_type_name'] = processed_df['income_type_name'].fillna('免扣')
+
+        # 保留貸方項目 amount = constant + abs(amount)
+        netting_df = DataProcessor.group_by_supplier(processed_df)
+        netting_df = DataProcessor.create_mapping_key(netting_df)
+        processed_df = DataProcessor.create_mapping_key(processed_df)
+        processed_df = DataProcessor.copy_amount_for_log(processed_df)
         
         # 篩選出金額大於0的資料
         if 'amount' in processed_df.columns:
@@ -187,7 +193,7 @@ if __name__ == "__main__":
     from core.data_processor import DataProcessor
     
     # 測試資料
-    test_file = Path("C:/SEA/AP Tax Check/withholding_tax_classifier/resources/SEA_Open_Bill_Report_240325.xlsx")
+    test_file = Path("C:/SEA/AP Tax Check/withholding_tax_classifier/tests/SEA_Open_Bill_Report_240325.xlsx")
     
     # 初始化資料處理器和特徵工程
     dp = DataProcessor()
