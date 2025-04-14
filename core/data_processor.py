@@ -106,7 +106,8 @@ class DataProcessor:
         # 預設所需列
         if required_columns is None:
             required_columns = [
-                'Payment Date', 'Remit-to Supplier', 'Supplier ID', 
+                'GL Date', 'AP Voucher No', 'Payment Date', 'Remit-to Supplier', 
+                'Supplier ID', 'Supplier Name', 'Supplier Tax Number', 'LineAccount',
                 'Line Desc', 'Line Amount', 'W/H Tax', 'W/H Tax Name', 
                 'Income Type', 'Income Type Name'
             ]
@@ -257,3 +258,10 @@ class DataProcessor:
         df_copy.drop(columns=unnecessary_cols, inplace=True, errors='ignore')
         return df_copy
     
+    def reformat_result(self, df: pd.DataFrame) -> pd.DataFrame:
+        """格式化結果, columns refer to self.extract_features"""
+        df_copy = df.copy()
+        df_copy = df_copy.assign(
+            amount=df_copy['origin_amount']
+        ).drop(columns=['origin_amount', 'mapping_key'])
+        return df_copy

@@ -68,10 +68,10 @@ class Predictor:
         # 載入並處理數據
         raw_data = self.data_processor.load_data(file_path)
         cleaned_data = self.data_processor.clean_data()
-        # features_data = self.data_processor.extract_features()
+        features_data = self.data_processor.extract_features()
         
         # 預處理並特徵工程
-        processed_data = self.feature_engineer.preprocess_data(cleaned_data)
+        processed_data = self.feature_engineer.preprocess_data(features_data)
         
         # 如果沒有特徵管道，創建一個
         if self.feature_engineer.feature_pipeline is None:
@@ -89,6 +89,7 @@ class Predictor:
         # 將預測結果加入到原始數據
         result_df = processed_data.copy()
         result_df['predicted_income_type'] = predictions
+        result_df = self.data_processor.reformat_result(result_df)
         
         logger.info(f"Prediction completed. {len(predictions)} records processed.")
         return result_df
